@@ -1,5 +1,5 @@
 # FCRN
-The unofficial Pytorch implementation of Fully Convolutional Recurrent Networks for Speech Enhancement (in 2022 ICASSP). </br></br>
+The unofficial Pytorch implementation of Fully Convolutional Recurrent Networks for Speech Enhancement (in 2020 ICASSP). </br></br>
 I am interested in lightweight audio noise reduction models. There are some uncertainties in the reproduction process of FCRN models, and the validity of the models has not been verified at present. You feel free to contact me by [email📫](mailto:yadongchen2022@163.com) if you've got any problems.
 
 ## Requirement
