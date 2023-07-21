@@ -54,7 +54,7 @@ class FCRN(nn.Module):
         self.de_convblock_3 = ConvBlock(2 * F, F, kernel_size=(N, 1), stride=(1, 1), padding="same")
         self.de_convblock_4 = ConvBlock(F, F, kernel_size=(N, 1), stride=(1, 1), padding="same")
 
-        self.out_convblock = ConvBlock(F, out_channels, kernel_size=(N, 1), stride=(1, 1), padding="same")
+        self.out_convblock = ConvBlock(F, out_channels, kernel_size=(N, 1), stride=(1, 1), padding="same", activate=False)
 
     def forward(self, x, rnn_state=None):
         input = x
