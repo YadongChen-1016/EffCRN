@@ -1,5 +1,5 @@
 # FCRN
-The unofficial Pytorch implementation of Fully Convolutional Recurrent Networks for Speech Enhancement (in 2022 ICASSP) </br>
+The unofficial Pytorch implementation of Fully Convolutional Recurrent Networks for Speech Enhancement (in 2022 ICASSP). </br></br>
 I am interested in lightweight audio noise reduction models. There are some uncertainties in the reproduction process of FCRN models, and the validity of the models has not been verified at present. You feel free to contact me by [email📫](yadongchen2022@163.com) if you've got any problems.
 
 ## Requirement
@@ -14,7 +14,7 @@ pytorch >= 1.8.0 </br>
 | FCRN  | 5.2M  |   631.5M    |
 | FCRN* | 5.3M  |   632.8M    |
 
-</br></br>
+</br>
 "*" represents my reproduction. </br>
 I reproduced the model structure of FCRN and found that the number of parameters is approximately 5.32M, and the FLOPs per frame is about 632.77M. The reference score of FCRN is get form [here](https://ieeexplore.ieee.org/abstract/document/9914702)👈. 
 
