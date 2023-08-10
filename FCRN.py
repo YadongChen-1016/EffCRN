@@ -45,7 +45,8 @@ class FCRN(nn.Module):
         self.en_convblock_4 = ConvBlock(2 * F, 2 * F, kernel_size=(N, 1), stride=(1, 1), padding="same")
         self.down_sampling_2 = nn.MaxPool2d(kernel_size=(2, 1))
 
-        self.convlstm = ConvLSTM(65, 2 * F, F, kernel_size=N, cnn_dropout=0.2, rnn_dropout=0.2, batch_first=True, bias=False)
+        self.convlstm = ConvLSTM(65, 2 * F, F, kernel_size=N, cnn_dropout=0.2, rnn_dropout=0.2, batch_first=True,
+                                 bias=False)
 
         self.up_sampling_1 = nn.Upsample(scale_factor=(2, 1))
         self.de_convblock_1 = ConvBlock(F, 2 * F, kernel_size=(N, 1), stride=(1, 1), padding="same")
@@ -54,7 +55,19 @@ class FCRN(nn.Module):
         self.de_convblock_3 = ConvBlock(2 * F, F, kernel_size=(N, 1), stride=(1, 1), padding="same")
         self.de_convblock_4 = ConvBlock(F, F, kernel_size=(N, 1), stride=(1, 1), padding="same")
 
-        self.out_convblock = ConvBlock(F, out_channels, kernel_size=(N, 1), stride=(1, 1), padding="same", activate=False)
+        self.out_convblock = ConvBlock(F, out_channels, kernel_size=(N, 1), stride=(1, 1), padding="same",
+                                       activate=False)
+
+    def mask_func(self, noisy, estimate):
+        r, i = noisy[:, 2, :, :], noisy[:, 3, :, :]
+        r_hat, i_hat = estimate[:, 0, :, :], noisy[:, 1, :, :]
+        mag_mask = torch.sqrt(r_hat ** 2 + i_hat ** 2)
+        phase_rotate = torch.atan2(i_hat, r_hat)
+        mag_mask = torch.tanh(mag_mask)
+        mag = mag_mask * torch.sqrt(r ** 2 + i ** 2)
+        phase = phase_rotate + torch.atan2(i, r)
+        # return real, imag
+        return mag * torch.cos(phase), mag * torch.sin(phase)
 
     def forward(self, x, rnn_state=None):
         input = x
@@ -75,7 +88,9 @@ class FCRN(nn.Module):
         de_conv_3 = self.de_convblock_3(up_2)
         de_conv_4 = self.de_convblock_4(de_conv_3)
         out = self.out_convblock(de_conv_4 + en_conv_2)[:, :, :-3, :]
-        return out, state_out
+        real, imag = self.mask_func(x, out)
+        est = torch.cat([real.unsqueeze(1), imag.unsqueeze(1)], dim=1)
+        return est, state_out
 
 
 class TorchSignalToFrames(object):
@@ -142,13 +157,17 @@ if __name__ == '__main__':
     window = torch.sqrt(torch.from_numpy(np.hanning(n_fft).astype(np.float32)))
     spec = torch.view_as_real(torch.fft.rfft(input)).permute(0, 3, 2, 1).contiguous()
     _, _, _, t = spec.size()
+    est_out = torch.zeros(spec.size(), dtype=spec.dtype, device=spec.device)
     for i in range(t):
         if i < t - 2:
-            input_frame = torch.cat([spec[:, :, :, i], spec[:, :, :, i+1], spec[:, :, :, i+2]], dim=1).unsqueeze(-1)
+            input_frame = torch.cat([spec[:, :, :, i], spec[:, :, :, i + 1], spec[:, :, :, i + 2]], dim=1).unsqueeze(-1)
         elif i == t - 2:
-            input_frame = torch.cat([spec[:, :, :, i-1], spec[:, :, :, i], spec[:, :, :, i+1]], dim=1).unsqueeze(-1)
+            input_frame = torch.cat([spec[:, :, :, i - 1], spec[:, :, :, i], spec[:, :, :, i + 1]], dim=1).unsqueeze(-1)
         else:
-            input_frame = torch.cat([spec[:, :, :, i-2], spec[:, :, :, i-1], spec[:, :, :, i]], dim=1).unsqueeze(-1)
+            input_frame = torch.cat([spec[:, :, :, i - 2], spec[:, :, :, i - 1], spec[:, :, :, i]], dim=1).unsqueeze(-1)
 
-        out, state_list = model(input_frame, state_list)
+        est_out_t, state_list = model(input_frame, state_list)
+        est_out[:, :, :, i] = est_out_t.squeeze(-1)
+    print(est_out.shape)
     summary(model, input_size=(1, 6, 257, 1))
+
