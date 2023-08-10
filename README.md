@@ -1,5 +1,5 @@
-# FCRN
-The unofficial Pytorch implementation of Fully Convolutional Recurrent Networks for Speech Enhancement (in 2020 ICASSP). </br></br>
+# EffCRN
+The unofficial Pytorch implementation of EffCRN: An Efficient Convolutional Recurrent Network for High-Performance Speech Enhancement (in 2023 Interspeech). </br></br>
 I am interested in lightweight audio noise reduction models. There are some uncertainties in the reproduction process of FCRN models, and the validity of the models has not been verified at present. You feel free to contact me by [email📫](mailto:yadongchen2022@163.com) if you've got any problems.
 
 ## Requirement
@@ -9,13 +9,13 @@ pytorch >= 1.8.0 </br>
 
 ## Instruction
 
-| Model | Param.| MACs/frame |
-|:-----:|:-----:|:-----------:|
-| FCRN  | 5.2M  |   631.5M    |
-| FCRN* | 5.3M  |   632.8M    |
+| Model | Param.(paper) | Param.(here)| MACs/frame(paper)| MACs/frame(here)|
+|:-----:|:-------------:|:-----------:|:----------------:|:---------------:|
+| FCRN  | 5.2M  |  5.3M  |   631.5M    |     632.8M    |
+| FCRN15 | 875K |  927K  |    61.5M    |      64.0M    |
+| EffCRN23  | 997K  |  890K  |    41M   |   27.2M  |
+| EffCRN23lite | 396K |  355K  |    16M   |   10.9M  |
 </br>
-"*" represents my reproduction. </br>
-I reproduced the model structure of FCRN and found that the number of parameters is approximately 5.32M, and the MACs per frame is about 632.77M. The reference score of FCRN is get form <a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9914702">here🔍</a>👈. 
 
 ## Citations
 ```shell
